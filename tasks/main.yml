@@ -1,0 +1,45 @@
+---
+- name: include variables
+  include_role:
+    name: lihas_variables
+  when: configspaces is not defined
+- name: install software
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - keepalived
+  loop_control:
+    loop_var: item
+- name: combine keepalive ip correlations, init
+  set_fact:
+    keepalive_ip_correlation: {}
+- name: combine keepalive ip correlations, expand with configspaces
+  set_fact:
+    keepalive_ip_correlation: "{{ keepalive_ip_correlation | combine(hostvars[inventory_hostname][item]['config']['roles']['keepalived']['ip_correlation'] | default({})) }}"
+    cacheable: no
+  loop: "{{ configspaces }}"
+- debug:
+    var: keepalive_ip_correlation
+    verbosity: 1
+- name: /etc/keepalived/keepalived.conf
+  template:
+    src: "files/{{ item }}.j2"
+    dest: "/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - etc/keepalived/keepalived.conf
+    - etc/iproute2/rt_tables.d/keepalived.conf
+  notify: reload_keepalived
+- name: /usr/local/bin/keepalived-notify
+  template:
+    src: "files/{{ item }}.j2"
+    dest: "/{{ item }}"
+    owner: root
+    group: root
+    mode: 0755
+  loop:
+    - usr/local/bin/keepalived-notify
+  notify: reload_keepalived

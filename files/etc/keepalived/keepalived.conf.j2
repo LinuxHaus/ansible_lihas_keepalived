@@ -1,0 +1,39 @@
+! FAI ansible managed
+
+global_defs {
+        default_interface {{ keepalived.default_interface | default('eth0') }}
+        enable_script_security
+        script_user root
+}
+
+{% for i in keepalive_ip_correlation | default({}) | dict2items() %}
+{%   if i.value.extern_ipv4 is defined and i.value.extern_ipv4_iface is defined %}
+! LXC {{ i.key }}
+vrrp_script chk_{{ i.value.intern_ipv4 }} {
+        script "/bin/ping -qn -c 1 -w 1 {{ i.value.intern_ipv4 }}"
+        interval 2
+        init_fail
+        rise 1
+        fall 3
+}
+
+vrrp_instance ip{{ i.value.extern_ipv4 }} {
+	interface {{ keepalived.default_interface | default('eth0') }}
+        state BACKUP
+        virtual_router_id {{ i.value.intern_ipv4 | regex_replace("^.*\.", "") }}
+        priority 100
+        promote_secondaries
+        track_script {
+                chk_{{ i.value.intern_ipv4 }}
+        }
+        virtual_ipaddress {
+                {{ i.value.extern_ipv4 }}/24 dev {{ i.value.extern_ipv4_iface | default('eth0') }} scope global
+        }
+        notify_master "/usr/local/bin/keepalived-notify INSTANCE ip{{ i.value.extern_ipv4 }} MASTER 255 "
+        notify_backup "/usr/local/bin/keepalived-notify INSTANCE ip{{ i.value.extern_ipv4 }} BACKUP 100"
+        notify_fault  "/usr/local/bin/keepalived-notify INSTANCE ip{{ i.value.extern_ipv4 }} FAULT 100"
+        notify_stop   "/usr/local/bin/keepalived-notify INSTANCE ip{{ i.value.extern_ipv4 }} STOP 100"
+}
+
+{%   endif %}
+{% endfor %}

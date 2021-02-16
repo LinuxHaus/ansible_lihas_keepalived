@@ -1,0 +1,6 @@
+# managed by ansible
+{% for i in keepalived.routers | default({}) | dict2items() %}
+{%   if i.value.rt_table_name is defined and i.value.rt_table_id is defined %}
+{{ i.value.rt_table_id }}	{{ i.value.rt_table_name }}
+{%   endif %}
+{% endfor %}

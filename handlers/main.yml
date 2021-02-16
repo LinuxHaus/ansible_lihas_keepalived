@@ -1,0 +1,7 @@
+---
+# handlers file for lihas_keepalived
+- name: reload_keepalived
+  service:
+    name: keepalived
+    state: reloaded
+...

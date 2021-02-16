@@ -1,0 +1,4 @@
+---
+- name: lihas_keepalived
+  src: https://github.com/LinuxHaus/ansible_lihas_keepalived.git
+  version: origin/master
