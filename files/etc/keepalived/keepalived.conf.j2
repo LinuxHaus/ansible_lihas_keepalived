@@ -6,6 +6,47 @@ global_defs {
         script_user root
 }
 
+{% if hostvars[inventory_hostname].service.keepalived.vip is defined %}
+{% if hostvars[inventory_hostname].service.keepalived.vip | default({}) | dict2items | length <= 1 %}
+vrrp_sync_group sync {
+  group {
+{% for i in hostvars[inventory_hostname].service.keepalived.vip | default({}) | dict2items %}
+    ip_{{ i.key }}
+{% endfor %}
+  }
+}
+{%   endif %}
+{%   for i in hostvars[inventory_hostname].service.keepalived.vip | default({}) | dict2items %}
+vrrp_instance ip_{{ i.key }} {
+  state BACKUP
+  interface {{ i.value.interface }}
+  virtual_router_id {{ i.key }}
+  priority 100
+  promote_secondaries
+  virtual_ipaddress {
+{%   for ip in i.value.ipres | default([]) %}
+    {{ ip }} scope global
+{%   endfor %}
+  }
+{%   if i.value.routes is defined %}
+  virtual_routes {
+{%     for route in i.value.routes | default([]) %}
+    {{ route }}
+{%     endfor %}
+  }
+{%   endif %}
+  notify_master "/usr/local/bin/keepalived-notify INSTANCE ip_{{ i.key }} MASTER 255"
+  notify_backup "/usr/local/bin/keepalived-notify INSTANCE ip_{{ i.key }} BACKUP 100"
+  notify_fault "/usr/local/bin/keepalived-notify INSTANCE ip_{{ i.key }} FAULT 100"
+  notify_stop "/usr/local/bin/keepalived-notify INSTANCE ip_{{ i.key }} STOP 100"
+  authentication {
+    auth_type PASS
+    auth_pass ip_{{ i.key }}
+  }
+}
+{%   endfor %}
+{% endif %}
+
 {% for i in keepalive_ip_correlation | default({}) | dict2items() %}
 {%   if i.value.extern_ipv4 is defined and i.value.extern_ipv4_iface is defined %}
 ! LXC {{ i.key }}
