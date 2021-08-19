@@ -20,6 +20,10 @@ ansible-galaxy install -r requirements.yml
 ansible-playbook -i localhost, keepalived.yml
 ```
 
+Tags
+----
+* keepalived_config: only do configuratiuon, no software installation, needs tag `variables` as well
+
 Role Variables
 --------------
 
