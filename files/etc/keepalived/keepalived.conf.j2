@@ -68,7 +68,7 @@ vrrp_instance ip{{ i.value.extern_ipv4 }} {
                 chk_{{ i.value.intern_ipv4 }}
         }
         virtual_ipaddress {
-                {{ i.value.extern_ipv4 }}/24 dev {{ i.value.extern_ipv4_iface | default('eth0') }} scope global
+                {{ i.value.extern_ipv4 }}/{{ i.value.extern_ipv4_netmask | default('24') }} dev {{ i.value.extern_ipv4_iface | default('eth0') }} scope global
         }
         notify_master "/usr/local/bin/keepalived-notify INSTANCE ip{{ i.value.extern_ipv4 }} MASTER 255 "
         notify_backup "/usr/local/bin/keepalived-notify INSTANCE ip{{ i.value.extern_ipv4 }} BACKUP 100"
