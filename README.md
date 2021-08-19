@@ -3,6 +3,12 @@ lihas_keepalived
 
 Install and configure keepalived to manage gateways on virtualization hosts
 
+Intended special setup:
+* 1 gateway per virtualization host to enable a local virtual machine (lxc/kvm) to exit this very virtualization host via a direct attached interface instead of relaying via central gateway on one of the virtualization hosts, despite using internal private IPs
+* to achieve this the gateway and the lxc/kvm share a host-only network, the gateways on all hosts have the same IP in this network
+* the official IPs for services are DNATed via firewall-lihas
+* the official IPs for services are active on the gateway on the same host with the service lxc/kvm, managed via keepalived
+
 Requirements
 ------------
 
