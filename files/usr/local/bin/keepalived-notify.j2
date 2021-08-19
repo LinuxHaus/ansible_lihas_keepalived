@@ -15,10 +15,10 @@ case "$NAME" in
 	ipset create -exist keepalived hash:ip
 	case $TARGET_STATE in
 	    MASTER)
-	        ipset add -exist keepalived {{ i.value.extern_ipv4_gw }}
+	        ipset add -exist keepalived {{ i.value.extern_ipv4 }}
                 ;;
 	    BACKUP|FAULT|STOP)
-	        ipset del -exist keepalived {{ i.value.extern_ipv4_gw }}
+	        ipset del -exist keepalived {{ i.value.extern_ipv4 }}
                 ;;
 	esac
 	;;
