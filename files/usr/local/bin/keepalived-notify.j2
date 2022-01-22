@@ -9,9 +9,9 @@ case "$NAME" in
 {% for i in keepalive_ip_correlation | default({}) | dict2items() %}
 {%   if i.value.extern_ipv4 is defined and i.value.extern_ipv4_iface is defined and i.value.extern_ipv4_iface is defined %}
     "ip{{ i.value.extern_ipv4 }}")
-	ip route replace default via {{ i.value.extern_ipv4_gw }} dev {{ i.value.extern_ipv4_iface }} table {{ keepalived['routers'][i.value.extern_ipv4_gw]['rt_table_name'] }}
-	ip rule add from {{ i.value.intern_ipv4 }} table {{ keepalived['routers'][i.value.extern_ipv4_gw]['rt_table_name'] }} pref 9000
-	ip rule add from {{ i.value.extern_ipv4 }} {% if i.value.intern_ipv4_iface is defined %}iif {{ i.value.intern_ipv4_iface }} {% endif %}table {{ keepalived['routers'][i.value.extern_ipv4_gw]['rt_table_name'] }} pref 9000
+	ip route replace default via {{ i.value.extern_ipv4_gw }} dev {{ i.value.extern_ipv4_iface }} table {{ keepalived['routers'][i.value.extern_ipv4_gw]['rt_table_name'] | default('main') }}
+	ip rule add from {{ i.value.intern_ipv4 }} table {{ keepalived['routers'][i.value.extern_ipv4_gw]['rt_table_name'] | default('main') }} pref 9000
+	ip rule add from {{ i.value.extern_ipv4 }} {% if i.value.intern_ipv4_iface is defined %}iif {{ i.value.intern_ipv4_iface }} {% endif %}table {{ keepalived['routers'][i.value.extern_ipv4_gw]['rt_table_name'] | default('main') }} pref 9000
 	ipset create -exist keepalived hash:ip
 	case $TARGET_STATE in
 	    MASTER)
