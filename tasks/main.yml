@@ -30,6 +30,23 @@
     verbosity: 1
   tags:
     - keepalived_config
+- name: combine vip base
+  set_fact:
+    keepalive_vip: "{{ keepalive_vip | default({}) | combine(service.keepalived.vip | default({}), recursive=True) }}"
+  tags:
+    - keepalived_config
+- name: combine vip configspaces
+  set_fact:
+    keepalive_vip: "{{ keepalive_vip | combine(hostvars[inventory_hostname][item]['config']['keepalived']['vip'] | default({}), recursive=True) }}"
+    cacheable: no
+  loop: "{{ configspaces }}"
+  tags:
+    - keepalived_config
+- debug:
+    var: keepalive_vip
+    verbosity: 1
+  tags:
+    - keepalived_config
 - name: /etc/keepalived/keepalived.conf
   template:
     src: "files/{{ item }}.j2"

@@ -38,6 +38,10 @@ roles.proxmox.lxc.%.extern_ipv4_gw
 roles.proxmox.lxc.%.extern_ipv4_iface # external interface name on gateway for this IP
 roles.proxmox.lxc.%.intern_ipv4
 roles.proxmox.lxc.%.infrastructure: firewall_cluster # only informative
+
+%.config.keepalived.default_interface: default interface for vrrp packets
+%.config.keepalived.vip.ID.interface: specific interface for vrrp packets, ID is the VRRP instance number, unique, 0-255
+%.config.keepalived.vip.ID.ipres[]: list of ip resources
 ```
 Dependencies
 ------------
@@ -52,6 +56,19 @@ Example Playbook
 ...
 ```
 
+Example Variables
+-----------------
+```
+myhost:
+  config:
+    keepalived:
+      default_interface: eth0
+      vip:
+        '53':
+           interface: eth2
+           ipres:
+           - 10.0.0.1/24 dev eth1
+```
 
 License
 -------

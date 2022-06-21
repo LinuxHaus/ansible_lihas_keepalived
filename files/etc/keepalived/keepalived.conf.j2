@@ -6,17 +6,16 @@ global_defs {
         script_user root
 }
 
-{% if hostvars[inventory_hostname].service.keepalived.vip is defined %}
-{% if hostvars[inventory_hostname].service.keepalived.vip | default({}) | dict2items | length <= 1 %}
+{% if keepalive_vip | default({}) | dict2items | length > 1 %}
 vrrp_sync_group sync {
   group {
-{% for i in hostvars[inventory_hostname].service.keepalived.vip | default({}) | dict2items %}
+{% for i in keepalive_vip | default({}) | dict2items %}
     ip_{{ i.key }}
 {% endfor %}
   }
 }
 {%   endif %}
-{%   for i in hostvars[inventory_hostname].service.keepalived.vip | default({}) | dict2items %}
+{%   for i in keepalive_vip | default({}) | dict2items %}
 vrrp_instance ip_{{ i.key }} {
   state BACKUP
   interface {{ i.value.interface }}
@@ -45,7 +44,6 @@ vrrp_instance ip_{{ i.key }} {
   }
 }
 {%   endfor %}
-{% endif %}
 
 {% for i in keepalive_ip_correlation | default({}) | dict2items() %}
 {%   if i.value.extern_ipv4 is defined and i.value.extern_ipv4_iface is defined %}
