@@ -6,6 +6,9 @@ global_defs {
         script_user root
 }
 
+! EXPERIMENTAL: include, glob/location may change
+include /etc/keepalived/conf.d/*.conf
+
 {% if keepalive_vip | default({}) | dict2items | length > 1 %}
 vrrp_sync_group sync {
   group {
