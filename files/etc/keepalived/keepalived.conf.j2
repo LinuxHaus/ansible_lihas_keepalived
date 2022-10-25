@@ -37,6 +37,13 @@ vrrp_instance ip_{{ i.key }} {
 {%     endfor %}
   }
 {%   endif %}
+{%   if i.value.rules is defined %}
+  virtual_rules {
+{%     for rules in i.value.rules | default([]) %}
+    {{ rules }}
+{%     endfor %}
+  }
+{%   endif %}
   notify_master "/usr/local/bin/keepalived-notify INSTANCE ip_{{ i.key }} MASTER 255"
   notify_backup "/usr/local/bin/keepalived-notify INSTANCE ip_{{ i.key }} BACKUP 100"
   notify_fault "/usr/local/bin/keepalived-notify INSTANCE ip_{{ i.key }} FAULT 100"
