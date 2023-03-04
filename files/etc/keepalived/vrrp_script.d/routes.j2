@@ -1,0 +1,11 @@
+#!/bin/bash
+if ! {{ item.value.check_iface }}; then
+    exit 1
+fi
+{% for ip in item.value.checkhost | default([]) %}
+if /bin/ping -qn -i 0.2 -c 2 -w 1 {{ ip }} >/dev/null; then
+    exit 0
+fi
+{% endfor %}
+
+exit 2

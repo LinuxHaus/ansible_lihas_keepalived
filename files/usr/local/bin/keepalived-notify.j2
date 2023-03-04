@@ -25,6 +25,19 @@ case "$NAME" in
 {%   endif %}
 {% endfor %}
 esac
+
+case $TARGET_STATE in
+    MASTER)
+	echo $0 running MASTER | logger
+	ifup --force --allow HA_$NAME -a -v 2>&1 | logger
+	ifup --force --allow HA -a -v 2>&1 | logger
+	;;
+    BACKUP|FAULT|STOP)
+	ifdown --force --allow HA_$NAME -a -v 2>&1 | logger
+	ifdown --force --allow HA -a -v 2>&1 | logger
+	;;
+esac
+
 if [ -x "$BASENAME-$NAME" ]; then
   "$BASENAME-$NAME" "$TYPE" "$NAME" "$TARGET_STATE" "$PRIORITY"
 fi

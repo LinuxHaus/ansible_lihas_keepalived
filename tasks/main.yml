@@ -1,54 +1,74 @@
 ---
-- name: include variables
-  include_role:
+- name: Include variables
+  ansible.builtin.include_role:
     name: lihas_variables
   when: configspaces is not defined
   tags:
     - keepalived_config
-- name: install software
-  apt:
+- name: Install software
+  ansible.builtin.apt:
     name: "{{ item }}"
     state: present
   loop:
     - keepalived
   loop_control:
     loop_var: item
-- name: combine keepalive ip correlations, init
-  set_fact:
+- name: Combine keepalive ip correlations, init
+  ansible.builtin.set_fact:
     keepalive_ip_correlation: {}
   tags:
     - keepalived_config
-- name: combine keepalive ip correlations, expand with configspaces
-  set_fact:
+- name: Combine keepalive ip correlations, expand with configspaces
+  ansible.builtin.set_fact:
     keepalive_ip_correlation: "{{ keepalive_ip_correlation | combine(hostvars[inventory_hostname][item]['config']['roles']['keepalived']['ip_correlation'] | default({})) }}"
-    cacheable: no
+    cacheable: false
   loop: "{{ configspaces }}"
   tags:
     - keepalived_config
-- debug:
+- name: "DEBUG: keepalive_ip_correlation"
+  ansible.builtin.debug:
     var: keepalive_ip_correlation
     verbosity: 1
   tags:
     - keepalived_config
-- name: combine vip base
-  set_fact:
+- name: Combine vip base
+  ansible.builtin.set_fact:
     keepalive_vip: "{{ keepalive_vip | default({}) | combine(service.keepalived.vip | default({}), recursive=True) }}"
   tags:
     - keepalived_config
-- name: combine vip configspaces
-  set_fact:
+- name: Combine vip configspaces
+  ansible.builtin.set_fact:
     keepalive_vip: "{{ keepalive_vip | combine(hostvars[inventory_hostname][item]['config']['keepalived']['vip'] | default({}), recursive=True) }}"
-    cacheable: no
+    cacheable: false
   loop: "{{ configspaces }}"
   tags:
     - keepalived_config
-- debug:
+- name: "DEBUG: keepalive_vip"
+  ansible.builtin.debug:
     var: keepalive_vip
     verbosity: 1
   tags:
     - keepalived_config
+- name: Combine router base
+  ansible.builtin.set_fact:
+    keepalive_routes: "{{ keepalive_routes | default({}) | combine(service.keepalived.routes | default({}), recursive=True) }}"
+  tags:
+    - keepalived_config
+- name: Combine routes configspaces
+  ansible.builtin.set_fact:
+    keepalive_routes: "{{ keepalive_routes | combine(hostvars[inventory_hostname][item]['config']['keepalived']['routes'] | default({}), recursive=True) }}"
+    cacheable: false
+  loop: "{{ configspaces }}"
+  tags:
+    - keepalived_config
+- name: Show keepalive_routes
+  ansible.builtin.debug:
+    var: keepalive_routes
+    verbosity: 1
+  tags:
+    - keepalived_config
 - name: /etc/keepalived/keepalived.conf
-  template:
+  ansible.builtin.template:
     src: "files/{{ item }}.j2"
     dest: "/{{ item }}"
     owner: root
@@ -57,11 +77,28 @@
   loop:
     - etc/keepalived/keepalived.conf
     - etc/iproute2/rt_tables.d/keepalived.conf
-  notify: reload_keepalived
+  notify: Reload keepalived
+  tags:
+    - keepalived_config
+- name: Create Directory /etc/keepalived/vrrp_script.d
+  ansible.builtin.file:
+    path: /etc/keepalived/vrrp_script.d
+    group: root
+    owner: root
+    mode: 0755
+    state: directory
+- name: /etc/keepalived/vrrp_script.d/routes
+  ansible.builtin.template:
+    src: "files/etc/keepalived/vrrp_script.d/routes.j2"
+    dest: "/etc/keepalived/vrrp_script.d/routes_{{ item.key }}"
+    owner: root
+    group: root
+    mode: 0555
+  loop: "{{ keepalive_routes | default({}) | dict2items }}"
   tags:
     - keepalived_config
 - name: /usr/local/bin/keepalived-notify
-  template:
+  ansible.builtin.template:
     src: "files/{{ item }}.j2"
     dest: "/{{ item }}"
     owner: root
@@ -69,6 +106,7 @@
     mode: 0755
   loop:
     - usr/local/bin/keepalived-notify
-  notify: reload_keepalived
+  notify: Reload keepalived
   tags:
     - keepalived_config
+...

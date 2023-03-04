@@ -1,10 +1,11 @@
 ---
 galaxy_info:
+  role_name: lihas_keepalived
   author: Adrian Reyer <lihas@lihas.de>
   description: Install keepalived on Debian
   license: GPL-3.0-or-later
   company: LiHAS - LinuxHaus Stuttgart
-  min_ansible_version: 2.9
+  min_ansible_version: "2.9"
   galaxy_tags: []
 
 dependencies:

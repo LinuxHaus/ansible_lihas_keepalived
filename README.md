@@ -44,6 +44,9 @@ roles.proxmox.lxc.%.infrastructure: firewall_cluster # only informative
 %.config.keepalived.default_interface: default interface for vrrp packets
 %.config.keepalived.vip.ID.interface: specific interface for vrrp packets, ID is the VRRP instance number, unique, 0-255
 %.config.keepalived.vip.ID.ipres[]: list of ip resources
+%.config.keepalived.routes.ID.routes[]: list of routes
+%.config.keepalived.routes.ID.check_iface[]: host on link of the interface we test. E.g. the gateway
+%.config.keepalived.routes.ID.checkhost[]: list of hosts to check via icmp
 ```
 Dependencies
 ------------

@@ -1,9 +1,11 @@
 ! FAI ansible managed
 
 global_defs {
-        default_interface {{ keepalived.default_interface | default('eth0') }}
-        enable_script_security
-        script_user root
+    default_interface {{ keepalived.default_interface | default('eth0') }}
+    enable_script_security
+    script_user root
+    vrrp_higher_prio_send_advert true
+    
 }
 
 ! EXPERIMENTAL: include, glob/location may change
@@ -18,6 +20,35 @@ vrrp_sync_group sync {
   }
 }
 {%   endif %}
+{%   for i in keepalive_routes | default({}) | dict2items %}
+vrrp_script chk_route_available_{{ i.key }} {
+    script "/etc/keepalived/vrrp_script.d/routes_{{ i.key }}"
+    interval 5
+    init_fail
+    rise 1
+    fall 3
+}
+vrrp_instance route_{{ i.key }} {
+    state BACKUP
+    interface {{ i.value.interface }}
+    virtual_router_id {{ i.key }}
+    priority 100
+    promote_secondaries
+    virtual_ipaddress {
+{%     for ip in i.value.ipres | default([]) %}
+      {{ ip }} scope global
+{%     endfor %}
+    }
+    virtual_routes {
+{%      for route in i.value.routes | default([]) %}
+	{{ route }}
+{%      endfor %}
+    }
+    track_script {
+	chk_route_available_{{ i.key }}
+    }
+}
+{%   endfor %}
 {%   for i in keepalive_vip | default({}) | dict2items %}
 vrrp_instance ip_{{ i.key }} {
   state BACKUP
