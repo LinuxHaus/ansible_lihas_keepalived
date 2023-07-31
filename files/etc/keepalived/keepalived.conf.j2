@@ -30,7 +30,7 @@ vrrp_script chk_route_available_{{ i.key }} {
 }
 vrrp_instance route_{{ i.key }} {
     state BACKUP
-    interface {{ i.value.interface }}
+    interface {{ i.value.interface | default(keepalived.default_interface | default('eth0') ) }}
     virtual_router_id {{ i.key }}
     priority 100
     promote_secondaries
@@ -52,7 +52,7 @@ vrrp_instance route_{{ i.key }} {
 {%   for i in keepalive_vip | default({}) | dict2items %}
 vrrp_instance ip_{{ i.key }} {
   state BACKUP
-  interface {{ i.value.interface }}
+  interface {{ i.value.interface | default(keepalived.default_interface | default('eth0') ) }}
   virtual_router_id {{ i.key }}
   priority 100
   promote_secondaries
