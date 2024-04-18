@@ -90,7 +90,7 @@ vrrp_instance ip_{{ i.key }} {
 {%   if i.value.extern_ipv4 is defined and i.value.extern_ipv4_iface is defined %}
 ! LXC {{ i.key }}
 vrrp_script chk_{{ i.value.intern_ipv4 }} {
-        script "/bin/ping -qn -c 1 -w 1 {{ i.value.intern_ipv4 }}"
+        script "/usr/local/bin/keepalived_check {{ i.value.intern_ipv4 }} {{ i.value.extern_ipv4 }}"
         interval 2
         init_fail
         rise 1

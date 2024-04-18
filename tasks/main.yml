@@ -109,4 +109,16 @@
   notify: Reload keepalived
   tags:
     - keepalived_config
+- name: /usr/local/bin/keepalived_check
+  ansible.builtin.template:
+    src: "files/{{ item }}.j2"
+    dest: "/{{ item }}"
+    owner: root
+    group: root
+    mode: 0755
+  loop:
+    - usr/local/bin/keepalived_check
+  notify: Reload keepalived
+  tags:
+    - keepalived_config
 ...
