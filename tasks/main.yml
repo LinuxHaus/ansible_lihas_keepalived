@@ -73,7 +73,7 @@
     dest: "/{{ item }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0444"
   loop:
     - etc/keepalived/keepalived.conf
     - etc/iproute2/rt_tables.d/keepalived.conf
@@ -85,7 +85,7 @@
     path: /etc/keepalived/vrrp_script.d
     group: root
     owner: root
-    mode: 0755
+    mode: "0555"
     state: directory
 - name: /etc/keepalived/vrrp_script.d/routes
   ansible.builtin.template:
@@ -93,7 +93,7 @@
     dest: "/etc/keepalived/vrrp_script.d/routes_{{ item.key }}"
     owner: root
     group: root
-    mode: 0555
+    mode: "0555"
   loop: "{{ keepalive_routes | default({}) | dict2items }}"
   tags:
     - keepalived_config
@@ -103,7 +103,7 @@
     dest: "/{{ item }}"
     owner: root
     group: root
-    mode: 0755
+    mode: "0555"
   loop:
     - usr/local/bin/keepalived-notify
   notify: Reload keepalived
@@ -115,7 +115,7 @@
     dest: "/{{ item }}"
     owner: root
     group: root
-    mode: 0755
+    mode: "0555"
   loop:
     - usr/local/bin/keepalived_check
   notify: Reload keepalived

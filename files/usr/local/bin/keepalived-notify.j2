@@ -1,4 +1,5 @@
 #!/bin/bash
+# ansible managed
 BASENAME="$0"
 TYPE="$1"
 NAME="$2"
@@ -10,6 +11,9 @@ case "$NAME" in
 {%   if i.value.extern_ipv4 is defined and i.value.extern_ipv4_iface is defined and i.value.extern_ipv4_iface is defined %}
     "ip{{ i.value.extern_ipv4 }}")
 	ip route replace default via {{ i.value.extern_ipv4_gw }} dev {{ i.value.extern_ipv4_iface }} table {{ keepalived['routers'][i.value.extern_ipv4_gw]['rt_table_name'] | default('main') }}
+{%      for route in keepalived['routers'][i.value.extern_ipv4_gw]['routes'] | default([]) %}
+	ip route add {{ route }} table {{ keepalived['routers'][i.value.extern_ipv4_gw]['rt_table_name'] | default('main') }} || true
+{%      endfor %}
 	ip rule add from {{ i.value.intern_ipv4 }} table {{ keepalived['routers'][i.value.extern_ipv4_gw]['rt_table_name'] | default('main') }} pref 9000
 	ip rule add from {{ i.value.extern_ipv4 }} {% if i.value.intern_ipv4_iface is defined %}iif {{ i.value.intern_ipv4_iface }} {% endif %}table {{ keepalived['routers'][i.value.extern_ipv4_gw]['rt_table_name'] | default('main') }} pref 9000
 	ipset create -exist keepalived hash:ip
