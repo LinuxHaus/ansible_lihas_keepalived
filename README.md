@@ -48,6 +48,8 @@ roles.proxmox.lxc.%.infrastructure: firewall_cluster # only informative
 %.config.keepalived.routes.ID.routes[]: list of routes
 %.config.keepalived.routes.ID.check_iface[]: host on link of the interface we test. E.g. the gateway
 %.config.keepalived.routes.ID.checkhost[]: list of hosts to check via icmp
+
+iproute2_tables_base_id: ID of iproute table 'base', default 150
 ```
 Dependencies
 ------------

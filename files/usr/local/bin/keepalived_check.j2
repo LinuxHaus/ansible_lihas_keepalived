@@ -3,7 +3,7 @@
 IPINT=$1
 IPEXT=$2
 
-/usr/bin/ping -qn -c 1 -w 1 $IPINT >/dev/null 2>&1
+ping -qn -c 1 -w 1 $IPINT >/dev/null 2>&1
 if [ $? -eq 0 ]; then
     if /usr/sbin/ipset list keepalived | grep -w $IPEXT; then
 	if /bin/ip addr list | grep -w $IPEXT; then
