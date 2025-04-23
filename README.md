@@ -50,6 +50,7 @@ roles.proxmox.lxc.%.infrastructure: firewall_cluster # only informative
 %.config.keepalived.routes.ID.checkhost[]: list of hosts to check via icmp
 
 iproute2_tables_base_id: ID of iproute table 'base', default 150
+keepalived_dont_track_primary: set 'dont_track_primary', default true
 ```
 Dependencies
 ------------

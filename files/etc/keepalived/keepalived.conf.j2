@@ -56,6 +56,9 @@ vrrp_instance ip_{{ i.key }} {
   virtual_router_id {{ i.key }}
   priority 100
   promote_secondaries
+{%  if keepalived_dont_track_primary | default(true) %}
+  dont_track_primary
+{%  endif %}
   virtual_ipaddress {
 {%   for ip in i.value.ipres | default([]) %}
     {{ ip }} scope global
